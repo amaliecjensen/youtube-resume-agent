@@ -6,7 +6,8 @@ En AI-drevet agent der kan generere resuméer af YouTube videoer ved hjælp af O
 
 - Henter transkripter fra YouTube videoer
 - Genererer resuméer og besvarelses ved hjælp af AI
-- Interaktiv chat-interface til at stille spørgsmål om videoindhold
+- chat-interface i kommandoprompt til at stille spørgsmål om videoindhold
+- chromaDb til at gemme tidligere forespørgsler 
 
 ## Setup
 
