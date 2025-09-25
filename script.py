@@ -3,6 +3,9 @@ from dotenv import load_dotenv
 from langchain_openai import ChatOpenAI
 from youtube_transcript_api import YouTubeTranscriptApi
 import re
+import chromadb
+from langchain_openai import OpenAIEmbeddings
+from datetime import datetime
 
 #lav en rag der giver et resume af en youtube video
 
@@ -30,11 +33,11 @@ def yt_transcript(url):
         print("Found English transcript")
     except:
         try:
-            result = api.fetch(videoId, languages=['da'])  # Prøv dansk
+            result = api.fetch(videoId, languages=['da'])  # derefter dansk
             print("Found Danish transcript")
         except:
             try:
-                result = api.fetch(videoId, languages=['da', 'en'])  # Prøv både dansk og engelsk
+                result = api.fetch(videoId, languages=['da', 'en'])  
                 print("Found transcript in available language")
             except Exception as e:
                 return f"Could not fetch transcript: {str(e)}"
@@ -60,3 +63,18 @@ while True:
     data = yt_transcript(url)
     answer = format_answer(data)
     print(f"Answer: {answer}")
+
+#database
+def setup_database():
+    """"Setup ChromaDB for video caching"""
+    client = chromadb.PersistentClient(path="./vhroma_db")
+#tabel til mine videoer
+    collection=client.get_or_create_collection(
+        name="youtubr_videos",
+        metadata={"description": "Cached Youtube video transcripts and summaries"}
+    )
+
+    return client, collection
+
+client, collection = setup_database()
+print(f"Database setup complete. Collection: {collection.name}")
