@@ -1,3 +1,7 @@
 langchain-openai
 python-dotenv
 youtube-transcript-api
+chromadb
+langchain-chroma
+langchain-text-splitters
+langchain-community
