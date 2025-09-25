@@ -14,15 +14,6 @@ openai_api_key = os.environ.get("OPENAI_API_KEY")
 # Initialize ChatGPT
 chat = ChatOpenAI(api_key=openai_api_key, model="gpt-3.5-turbo", temperature=0)
 
-
-# Chat loop
-#while True:
-  #  question = input("\nInsert Youtube URL to generate content(or 'quit'): ")
-   # if question.lower() == 'quit':
-       # break
-   # answer = xxxx(question)
-  #  print(f"Answer: {answer}")
-
 def yt_transcript(url):
     match = re.search(r'(?:v=|\/)([0-9A-Za-z_-]{11})', url)
 
@@ -32,10 +23,40 @@ def yt_transcript(url):
     videoId= match.group(1) # hent det fundne ID
 
     api = YouTubeTranscriptApi()
-    result = api.fetch(videoId)
+    
+    # Prøv forskellige sprog i prioriteret rækkefølge
+    try:
+        result = api.fetch(videoId, languages=['en'])  # Prøv engelsk først
+        print("Found English transcript")
+    except:
+        try:
+            result = api.fetch(videoId, languages=['da'])  # Prøv dansk
+            print("Found Danish transcript")
+        except:
+            try:
+                result = api.fetch(videoId, languages=['da', 'en'])  # Prøv både dansk og engelsk
+                print("Found transcript in available language")
+            except Exception as e:
+                return f"Could not fetch transcript: {str(e)}"
 
-    text = " ".join([snippet.text for snippet in result.snippets])  # ✅ Virker!
-    print(text)
+    text = " ".join([snippet.text for snippet in result.snippets])  
     return text
 
-yt_transcript("https://www.youtube.com/watch?v=dQw4w9WgXcQ")
+def format_answer(data):
+    """Format youtube transcript into resume based on the data"""
+    prompt = f"""
+    Based on this transcript text: {data}
+    
+    Provide a thoroughly resume and deliver the answer in English.
+    """
+    response = chat.invoke(prompt)
+    return response.content
+
+#Chat loop
+while True:
+    url = input("\nInsert Youtube URL(or type 'quit' to exit): ")
+    if url.lower() == 'quit':
+        break
+    data = yt_transcript(url)
+    answer = format_answer(data)
+    print(f"Answer: {answer}")
