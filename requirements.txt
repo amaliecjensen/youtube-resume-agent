@@ -3,5 +3,8 @@ python-dotenv
 youtube-transcript-api
 chromadb
 langchain-chroma
+tiktoken
+chromadb
+langchain-chroma
 langchain-text-splitters
 langchain-community
