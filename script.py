@@ -67,10 +67,10 @@ while True:
 #database
 def setup_database():
     """"Setup ChromaDB for video caching"""
-    client = chromadb.PersistentClient(path="./vhroma_db")
+    client = chromadb.PersistentClient(path="./chroma_db")
 #tabel til mine videoer
     collection=client.get_or_create_collection(
-        name="youtubr_videos",
+        name="youtube_videos",
         metadata={"description": "Cached Youtube video transcripts and summaries"}
     )
 
@@ -78,3 +78,30 @@ def setup_database():
 
 client, collection = setup_database()
 print(f"Database setup complete. Collection: {collection.name}")
+
+def check_video_exists(collection, video_id):
+    try:
+        results = collection.get(ids=[video_id])
+
+        if results['ids']:
+            return True, results
+        else:
+            return False, None
+    except:
+        return False, None
+    
+def get_cached_video(collection, video_id):
+    exists, results = check_video_exists(collection, video_id)
+
+    if exists:
+        data = results['metadatas'][0]
+
+        return{
+            'transcript': data['transcript'],
+            'resume': data.get('resume', None),  
+            'title': data.get('title', ''),
+            'url': data['url'],
+            'created_at': data['created_at']
+        }
+    else:
+        return None
