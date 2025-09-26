@@ -105,3 +105,26 @@ def get_cached_video(collection, video_id):
         }
     else:
         return None
+    
+def save_video_to_cache(collection, video_id, url, transcript, resume=None, title=""):
+    """Gem video data til cache"""
+    embeddings = OpenAIEmbeddings(api_key=openai_api_key)
+    transcript_embedding = embeddings.embed_query(transcript)
+
+    # Data to store 
+    metadata = {
+        'url': url,
+        'transcript': transcript,
+        'resume': resume or "",  # Tom string hvis None
+        'title': title,
+        'created_at': datetime.now().isoformat(),
+        'language': 'unknown'  # Vi kan opdatere dette senere
+    }
+
+    collection.add(
+        ids=[video_id],
+        embeddings=[transcript_embedding],
+        metadatas=[metadata],
+        documents=[transcript]
+    )
+    print(f"✅ Cached video {video_id} to database")
